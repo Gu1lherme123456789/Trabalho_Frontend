@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - Comp Win</title>
+  <style>
+    body {
+      background-color: #0b0b0b;
+      color: #fff;
+      font-family: sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }
+
+    .container {
+      background-color: #111;
+      padding: 40px;
+      border-radius: 12px;
+      box-shadow: 0 0 15px rgba(255, 0, 0, 0.3);
+      text-align: center;
+      width: 320px;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border: none;
+      border-radius: 6px;
+    }
+
+    button {
+      width: 100%;
+      padding: 10px;
+      background-color: #ff2d2d;
+      border: none;
+      color: #fff;
+      font-weight: bold;
+      cursor: pointer;
+      border-radius: 6px;
+      margin-top: 10px;
+    }
+
+    button:hover {
+      background-color: #ff4747;
+    }
+
+    .mensagem {
+      margin-top: 15px;
+      font-size: 14px;
+      color: #bbb;
+    }
+
+    a {
+      color: #ff2d2d;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Entrar na Comp Win</h2>
+    <input type="email" id="email" placeholder="E-mail" required>
+    <input type="password" id="senha" placeholder="Senha" required>
+    <button id="btnLogin">Entrar</button>
+    <p class="mensagem">Ainda não tem conta? <a href="#" id="criarConta">Cadastrar</a></p>
+  </div>
+
+  <script>
+  const btnLogin = document.getElementById("btnLogin");
+  const criarConta = document.getElementById("criarConta");
+
+  function getUsuarios() {
+    return JSON.parse(localStorage.getItem("usuarios_compwin") || "[]");
+  }
+
+  function salvarUsuarios(lista) {
+    localStorage.setItem("usuarios_compwin", JSON.stringify(lista));
+  }
+
+  btnLogin.addEventListener("click", () => {
+    const email = document.getElementById("email").value.trim();
+    const senha = document.getElementById("senha").value.trim();
+
+    if (!email || !senha) {
+      alert("Preencha todos os campos!");
+      return;
+    }
+
+    const usuarios = getUsuarios();
+    const usuario = usuarios.find(u => u.email === email && u.senha === senha);
+
+    if (usuario) {
+      localStorage.setItem("usuario_logado", JSON.stringify(usuario));
+      alert("Login realizado com sucesso!");
+      window.location.href = "carrinho.html";
+    } else {
+      alert("E-mail ou senha incorretos!");
+    }
+  });
+
+  criarConta.addEventListener("click", (e) => {
+    e.preventDefault();
+    const email = prompt("Digite seu e-mail:");
+    const senha = prompt("Crie uma senha:");
+
+    if (!email || !senha) {
+      alert("Cadastro cancelado.");
+      return;
+    }
+
+    const usuarios = getUsuarios();
+    if (usuarios.find(u => u.email === email)) {
+      alert("Usuário já cadastrado!");
+      return;
+    }
+
+    usuarios.push({ email, senha });
+    salvarUsuarios(usuarios);
+    alert("Conta criada com sucesso! Agora você pode fazer login.");
+  });
+  </script>
+</body>
+</html>
