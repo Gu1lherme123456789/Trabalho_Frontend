@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pagamento - Comp Win</title>
+  <style>
+    body {
+      background-color: #0b0b0b;
+      color: #fff;
+      font-family: sans-serif;
+      padding: 30px;
+    }
+
+    h1 {
+      text-align: center;
+      color: #ff2d2d;
+      margin-bottom: 30px;
+    }
+
+    .resumo {
+      background-color: #111;
+      padding: 20px;
+      border-radius: 10px;
+      max-width: 600px;
+      margin: 0 auto 30px auto;
+      box-shadow: 0 0 10px rgba(255, 0, 0, 0.3);
+    }
+
+    .item {
+      display: flex;
+      justify-content: space-between;
+      border-bottom: 1px solid #333;
+      padding: 8px 0;
+    }
+
+    .total {
+      text-align: right;
+      font-size: 18px;
+      margin-top: 10px;
+      color: #ff2d2d;
+      font-weight: bold;
+    }
+
+    .pagamento {
+      background-color: #111;
+      padding: 20px;
+      border-radius: 10px;
+      max-width: 600px;
+      margin: 0 auto;
+      box-shadow: 0 0 10px rgba(255, 0, 0, 0.3);
+    }
+
+    label {
+      display: block;
+      margin-bottom: 10px;
+    }
+
+    select, input {
+      width: 100%;
+      padding: 10px;
+      border: none;
+      border-radius: 6px;
+      margin-bottom: 15px;
+    }
+
+    .cartao-info {
+      display: none;
+    }
+
+    button {
+      background-color: #ff2d2d;
+      border: none;
+      color: #fff;
+      padding: 12px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+      width: 100%;
+      transition: background-color 0.2s ease;
+    }
+
+    button:hover {
+      background-color: #ff4747;
+    }
+
+    .sucesso {
+      display: none;
+      text-align: center;
+      margin-top: 30px;
+      color: #00ff84;
+      font-size: 18px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <h1>Finalizar Compra</h1>
+
+  <div class="resumo" id="resumo">
+    <h2>Resumo do Carrinho</h2>
+    <div id="itens"></div>
+    <p class="total" id="total"></p>
+  </div>
+
+  <div class="pagamento">
+    <h2>Escolha a forma de pagamento</h2>
+    <label for="forma">Forma de pagamento:</label>
+    <select id="forma">
+      <option value="">Selecione...</option>
+      <option value="pix">PIX</option>
+      <option value="cartao">Cartão de crédito</option>
+      <option value="avista">À vista (dinheiro)</option>
+    </select>
+
+    <div class="cartao-info" id="cartao-info">
+      <label>Número do cartão:</label>
+      <input type="text" id="numero" placeholder="0000 0000 0000 0000" maxlength="19">
+      
+      <label>Nome no cartão:</label>
+      <input type="text" id="nome-cartao" placeholder="Nome impresso no cartão">
+      
+      <label>Parcelas:</label>
+      <select id="parcelas">
+        <option value="1">1x sem juros</option>
+        <option value="2">2x sem juros</option>
+        <option value="3">3x sem juros</option>
+        <option value="6">6x sem juros</option>
+        <option value="12">12x sem juros</option>
+      </select>
+    </div>
+
+    <button id="finalizar">Concluir Compra</button>
+  </div>
+
+  <p class="sucesso" id="sucesso">✅ Compra realizada com sucesso! Obrigado por escolher a Comp Win.</p>
+
+  <script>
+    function getCarrinho() {
+      return JSON.parse(localStorage.getItem("carrinho_compwin") || "[]");
+    }
+
+    function renderizarResumo() {
+      const itensDiv = document.getElementById("itens");
+      const totalEl = document.getElementById("total");
+      const carrinho = getCarrinho();
+
+      let total = 0;
+      itensDiv.innerHTML = "";
+
+      carrinho.forEach(item => {
+        total += item.preco * item.quantidade;
+        const div = document.createElement("div");
+        div.classList.add("item");
+        div.innerHTML = `
+          <span>${item.quantidade}x ${item.nome}</span>
+          <span>R$ ${(item.preco * item.quantidade).toFixed(2)}</span>
+        `;
+        itensDiv.appendChild(div);
+      });
+
+      totalEl.textContent = "Total: R$ " + total.toFixed(2);
+    }
+
+    const forma = document.getElementById("forma");
+    const cartaoInfo = document.getElementById("cartao-info");
+
+    forma.addEventListener("change", () => {
+      cartaoInfo.style.display = forma.value === "cartao" ? "block" : "none";
+    });
+
+    document.getElementById("finalizar").addEventListener("click", () => {
+      const tipo = forma.value;
+      if (!tipo) {
+        alert("Selecione uma forma de pagamento!");
+        return;
+      }
+
+      if (tipo === "cartao") {
+        const numero = document.getElementById("numero").value.trim();
+        const nome = document.getElementById("nome-cartao").value.trim();
+        if (numero.length < 16 || nome.length < 3) {
+          alert("Preencha corretamente os dados do cartão.");
+          return;
+        }
+      }
+
+      // Simula o processamento da compra
+      localStorage.removeItem("carrinho_compwin");
+      document.getElementById("resumo").style.display = "none";
+      document.querySelector(".pagamento").style.display = "none";
+      document.getElementById("sucesso").style.display = "block";
+    });
+
+    renderizarResumo();
+  </script>
+</body>
+</html>

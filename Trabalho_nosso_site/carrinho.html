@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Seu Carrinho - Comp Win</title>
+  <style>
+    body {
+      background-color: #0b0b0b;
+      color: #fff;
+      font-family: sans-serif;
+      text-align: center;
+      padding: 40px;
+    }
+
+    .produto {
+      background-color: #111;
+      border-radius: 10px;
+      margin: 15px auto;
+      padding: 15px;
+      width: 90%;
+      max-width: 500px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 0 10px rgba(255,0,0,0.3);
+      flex-wrap: wrap;
+    }
+
+    img {
+      width: 80px;
+      height: 80px;
+      border-radius: 6px;
+      object-fit: cover;
+    }
+
+    .info {
+      flex: 1;
+      text-align: left;
+      margin-left: 15px;
+    }
+
+    .quantidade {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .quantidade button {
+      background-color: #ff2d2d;
+      border: none;
+      color: #fff;
+      width: 30px;
+      height: 30px;
+      border-radius: 5px;
+      font-size: 18px;
+      cursor: pointer;
+    }
+
+    .quantidade button:hover {
+      background-color: #ff4747;
+    }
+
+    .total {
+      margin-top: 30px;
+      font-size: 18px;
+    }
+
+    .botoes {
+      margin-top: 25px;
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+    }
+
+    button {
+      background-color: #ff2d2d;
+      border: none;
+      color: #fff;
+      padding: 10px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background-color 0.2s ease;
+    }
+
+    button:hover {
+      background-color: #ff4747;
+    }
+
+    h1 {
+      margin-bottom: 30px;
+      color: #ff2d2d;
+    }
+  </style>
+</head>
+<body>
+  <h1>Seu Carrinho</h1>
+  <div id="lista"></div>
+  <div class="total" id="total"></div>
+  
+  <div class="botoes">
+    <button id="limpar">Esvaziar Carrinho</button>
+    <button id="finalizar">Finalizar Compra</button>
+  </div>
+
+  <script>
+    function getCarrinho() {
+      return JSON.parse(localStorage.getItem("carrinho_compwin") || "[]");
+    }
+
+    function salvarCarrinho(c) {
+      localStorage.setItem("carrinho_compwin", JSON.stringify(c));
+    }
+
+    function renderizarCarrinho() {
+      const lista = document.getElementById("lista");
+      const totalEl = document.getElementById("total");
+      const carrinho = getCarrinho();
+      lista.innerHTML = "";
+      let total = 0;
+
+      if (carrinho.length === 0) {
+        lista.innerHTML = "<p>Seu carrinho está vazio.</p>";
+        totalEl.textContent = "";
+        return;
+      }
+
+      carrinho.forEach((item, index) => {
+        total += item.preco * item.quantidade;
+
+        const div = document.createElement("div");
+        div.classList.add("produto");
+
+        div.innerHTML = `
+          <img src="${item.imagem}">
+          <div class="info">
+            <p><strong>${item.nome}</strong></p>
+            <p>Preço: R$ ${item.preco.toFixed(2)}</p>
+          </div>
+          <div class="quantidade">
+            <button class="diminuir" data-index="${index}">−</button>
+            <span>${item.quantidade}</span>
+            <button class="aumentar" data-index="${index}">+</button>
+          </div>
+          <p>Total: R$ ${(item.preco * item.quantidade).toFixed(2)}</p>
+        `;
+
+        lista.appendChild(div);
+      });
+
+      totalEl.textContent = "Total: R$ " + total.toFixed(2);
+
+      document.querySelectorAll(".aumentar").forEach(btn => {
+        btn.addEventListener("click", () => alterarQuantidade(btn.dataset.index, 1));
+      });
+
+      document.querySelectorAll(".diminuir").forEach(btn => {
+        btn.addEventListener("click", () => alterarQuantidade(btn.dataset.index, -1));
+      });
+    }
+
+    function alterarQuantidade(index, delta) {
+      let carrinho = getCarrinho();
+      carrinho[index].quantidade += delta;
+
+      if (carrinho[index].quantidade <= 0) {
+        if (confirm("Deseja remover este item do carrinho?")) {
+          carrinho.splice(index, 1);
+        } else {
+          carrinho[index].quantidade = 1;
+        }
+      }
+
+      salvarCarrinho(carrinho);
+      renderizarCarrinho();
+    }
+
+    document.getElementById("limpar").addEventListener("click", () => {
+      if (confirm("Tem certeza que deseja esvaziar o carrinho?")) {
+        localStorage.removeItem("carrinho_compwin");
+        renderizarCarrinho();
+      }
+    });
+
+    // Novo botão de finalizar compra
+    document.getElementById("finalizar").addEventListener("click", () => {
+      const carrinho = getCarrinho();
+      if (carrinho.length === 0) {
+        alert("Seu carrinho está vazio!");
+        return;
+      }
+
+      const usuario = JSON.parse(localStorage.getItem("usuario_logado"));
+      if (!usuario) {
+        alert("Você precisa estar logado para finalizar a compra.");
+        window.location.href = "login.html";
+      } else {
+        window.location.href = "pagamento.html";
+      }
+    });
+
+    renderizarCarrinho();
+  </script>
+</body>
+</html>
